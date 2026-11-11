@@ -123,22 +123,13 @@ export function ListPage() {
       )}
 
       {!loading && visible.length > 0 && (
-        <div className="table-wrap">
-          <table className="invoice-table">
-            <thead>
-              <tr>
-                <th>Vendor</th>
-                <th>Invoice #</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Duplicate</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((invoice) => (
-                <tr
-                  key={invoice.id}
+        <>
+          <ul className="invoice-cards">
+            {visible.map((invoice) => (
+              <li key={invoice.id}>
+                <div
+                  className="invoice-card"
+                  role="link"
                   tabIndex={0}
                   onClick={() => navigate(`/invoices/${invoice.id}`)}
                   onKeyDown={(event) => {
@@ -148,31 +139,80 @@ export function ListPage() {
                     }
                   }}
                 >
-                  <td>{invoice.vendor}</td>
-                  <td className="mono">{invoice.invoice_number}</td>
-                  <td>{formatMoney(invoice.amount_cents, invoice.currency)}</td>
-                  <td>{formatDate(invoice.invoice_date)}</td>
-                  <td>
+                  <div className="invoice-card-top">
+                    <strong>{invoice.vendor}</strong>
                     <span className={`pill pill-${invoice.status}`}>{statusLabel(invoice.status)}</span>
-                  </td>
-                  <td>
-                    {invoice.duplicate_of ? (
-                      <Link
-                        className="dup-badge"
-                        to={`/invoices/${invoice.duplicate_of.id}`}
-                        onClick={(event) => event.stopPropagation()}
-                      >
-                        Possible duplicate of #{invoice.duplicate_of.id}
-                      </Link>
-                    ) : (
-                      <span className="muted">—</span>
-                    )}
-                  </td>
+                  </div>
+                  <p className="mono">{invoice.invoice_number}</p>
+                  <p className="invoice-card-meta">
+                    {formatMoney(invoice.amount_cents, invoice.currency)}
+                    <span aria-hidden="true"> · </span>
+                    {formatDate(invoice.invoice_date)}
+                  </p>
+                  {invoice.duplicate_of ? (
+                    <Link
+                      className="dup-badge"
+                      to={`/invoices/${invoice.duplicate_of.id}`}
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      Possible duplicate of #{invoice.duplicate_of.id}
+                    </Link>
+                  ) : null}
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="table-wrap">
+            <table className="invoice-table">
+              <thead>
+                <tr>
+                  <th>Vendor</th>
+                  <th>Invoice #</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Duplicate</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {visible.map((invoice) => (
+                  <tr
+                    key={invoice.id}
+                    tabIndex={0}
+                    onClick={() => navigate(`/invoices/${invoice.id}`)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        navigate(`/invoices/${invoice.id}`);
+                      }
+                    }}
+                  >
+                    <td>{invoice.vendor}</td>
+                    <td className="mono">{invoice.invoice_number}</td>
+                    <td>{formatMoney(invoice.amount_cents, invoice.currency)}</td>
+                    <td>{formatDate(invoice.invoice_date)}</td>
+                    <td>
+                      <span className={`pill pill-${invoice.status}`}>{statusLabel(invoice.status)}</span>
+                    </td>
+                    <td>
+                      {invoice.duplicate_of ? (
+                        <Link
+                          className="dup-badge"
+                          to={`/invoices/${invoice.duplicate_of.id}`}
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          Possible duplicate of #{invoice.duplicate_of.id}
+                        </Link>
+                      ) : (
+                        <span className="muted">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </section>
   );

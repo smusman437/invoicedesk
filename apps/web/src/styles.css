@@ -6,7 +6,6 @@
   --card: #fffaf3;
   --navy: #1e3a5f;
   --navy-2: #16304d;
-  --rust: #c45c26;
   --processing: #b45309;
   --review: #1d4e89;
   --approved: #2f6f4e;
@@ -14,6 +13,7 @@
   --dup-bg: #ffedd5;
   --dup-ink: #7c2d12;
   --shadow: 0 16px 40px rgba(28, 25, 21, 0.08);
+  --page-pad: clamp(16px, 4vw, 40px);
 }
 
 * {
@@ -46,17 +46,18 @@ a {
 .topbar {
   background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%);
   color: #f8f4ee;
-  padding: 28px 40px 24px;
+  padding: 22px var(--page-pad) 20px;
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 18px;
+  gap: 8px 18px;
 }
 
 .brand {
   color: inherit;
   text-decoration: none;
   font-family: Palatino, "Palatino Linotype", "Iowan Old Style", Georgia, serif;
-  font-size: 28px;
+  font-size: clamp(22px, 4vw, 28px);
   letter-spacing: 0.02em;
 }
 
@@ -67,23 +68,26 @@ a {
 }
 
 .content {
-  padding: 32px 40px 64px;
+  padding: var(--page-pad);
+  padding-bottom: 64px;
   max-width: 1100px;
+  margin: 0 auto;
 }
 
 .panel {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 16px;
-  padding: 28px 32px 36px;
+  padding: clamp(18px, 3vw, 32px) clamp(16px, 3vw, 32px) 36px;
   box-shadow: var(--shadow);
 }
 
 .panel-head {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px 16px;
   align-items: flex-start;
+  flex-wrap: wrap;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 20px;
@@ -97,6 +101,7 @@ h1,
 h2 {
   font-family: Palatino, "Palatino Linotype", "Iowan Old Style", Georgia, serif;
   margin: 0 0 6px;
+  overflow-wrap: anywhere;
 }
 
 .lede {
@@ -114,6 +119,7 @@ h2 {
 
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 20px;
 }
@@ -156,11 +162,12 @@ h2 {
 
 .table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .invoice-table {
   width: 100%;
-  min-width: 860px;
+  min-width: 760px;
   border-collapse: collapse;
 }
 
@@ -194,6 +201,42 @@ h2 {
   background: #f7f1e6;
 }
 
+.invoice-cards {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 12px;
+}
+
+.invoice-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.invoice-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.invoice-card p {
+  margin: 0 0 8px;
+}
+
+.invoice-card-meta {
+  color: var(--muted);
+  font-size: 14px;
+}
+
 .mono {
   font-variant-numeric: tabular-nums;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -207,6 +250,7 @@ h2 {
   padding: 4px 10px;
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .pill-processing {
@@ -238,12 +282,15 @@ h2 {
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
+  display: inline-block;
+  white-space: normal;
 }
 
 .dup-callout {
   display: block;
   margin: 0 0 20px;
   padding: 12px 14px;
+  line-height: 1.45;
 }
 
 .dup-callout a {
@@ -252,9 +299,9 @@ h2 {
 
 .facts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px 24px;
-  margin: 0 0 28px;
+  margin: 0 0 24px;
   padding: 8px 0 24px;
   border-bottom: 1px solid var(--line);
 }
@@ -277,6 +324,11 @@ h2 {
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 28px;
+}
+
+.closed-note {
+  margin: 0 0 28px;
+  color: var(--muted);
 }
 
 .btn {
@@ -368,19 +420,42 @@ h2 {
   color: var(--ink);
 }
 
-@media (max-width: 720px) {
-  .topbar,
-  .content {
-    padding-left: 18px;
-    padding-right: 18px;
+@media (max-width: 800px) {
+  .table-wrap {
+    display: none;
   }
 
-  .panel {
-    padding: 20px;
+  .invoice-cards {
+    display: grid;
   }
 
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .tab {
+    justify-content: space-between;
+  }
+
+  .actions,
+  .empty .btn,
+  .panel-head .btn {
+    width: 100%;
+  }
+
+  .actions .btn {
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-width: 520px) {
   .topbar {
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
+  }
+
+  .facts {
+    grid-template-columns: 1fr 1fr;
   }
 }

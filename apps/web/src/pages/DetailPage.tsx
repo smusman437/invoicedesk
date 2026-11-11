@@ -4,7 +4,6 @@ import { ApiError, api } from "../api";
 import {
   canApprove,
   canReject,
-  canSendToReview,
   formatDate,
   formatMoney,
   formatTimestamp,
@@ -85,6 +84,9 @@ export function DetailPage() {
   }
 
   const history = invoice.status_history ?? [];
+  const isClosed = invoice.status === "approved" || invoice.status === "rejected";
+  const showApprove = canApprove(invoice);
+  const showReject = canReject(invoice);
 
   return (
     <section className="panel">
@@ -139,32 +141,49 @@ export function DetailPage() {
         </div>
       </dl>
 
-      <div className="actions">
-        <button
-          type="button"
-          className="btn ghost"
-          disabled={!canSendToReview(invoice) || pending !== null}
-          onClick={() => changeStatus("needs_review")}
-        >
-          {pending === "needs_review" ? "Sending…" : "Send to review"}
-        </button>
-        <button
-          type="button"
-          className="btn approve"
-          disabled={!canApprove(invoice) || pending !== null}
-          onClick={() => changeStatus("approved")}
-        >
-          {pending === "approved" ? "Approving…" : "Approve"}
-        </button>
-        <button
-          type="button"
-          className="btn reject"
-          disabled={!canReject(invoice) || pending !== null}
-          onClick={() => changeStatus("rejected")}
-        >
-          {pending === "rejected" ? "Rejecting…" : "Reject"}
-        </button>
-      </div>
+      {invoice.status === "processing" && (
+        <div className="actions">
+          <button
+            type="button"
+            className="btn ghost"
+            disabled={pending !== null}
+            onClick={() => changeStatus("needs_review")}
+          >
+            {pending === "needs_review" ? "Sending…" : "Send to review"}
+          </button>
+        </div>
+      )}
+
+      {invoice.status === "needs_review" && (
+        <div className="actions">
+          {showApprove && (
+            <button
+              type="button"
+              className="btn approve"
+              disabled={pending !== null}
+              onClick={() => changeStatus("approved")}
+            >
+              {pending === "approved" ? "Approving…" : "Approve"}
+            </button>
+          )}
+          {showReject && (
+            <button
+              type="button"
+              className="btn reject"
+              disabled={pending !== null}
+              onClick={() => changeStatus("rejected")}
+            >
+              {pending === "rejected" ? "Rejecting…" : "Reject"}
+            </button>
+          )}
+        </div>
+      )}
+
+      {isClosed && (
+        <p className="closed-note">
+          This invoice is {statusLabel(invoice.status).toLowerCase()}. No further action is needed.
+        </p>
+      )}
 
       <section className="history">
         <h2>Status history</h2>
