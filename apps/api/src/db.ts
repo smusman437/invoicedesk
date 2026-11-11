@@ -126,26 +126,22 @@ function insertSeed(db: Database.Database): void {
     VALUES (?, NULL, ?, ?)
   `);
 
-  const seed = db.transaction(() => {
-    let originalId: number | null = null;
-    for (const row of SEED) {
-      const duplicateOfId = row.duplicateOf === "original" ? originalId : null;
-      const result = insertInvoice.run(
-        row.vendor,
-        row.invoice_number,
-        row.amount_cents,
-        row.currency ?? "USD",
-        row.invoice_date,
-        row.status,
-        duplicateOfId,
-        now,
-        now,
-      );
-      const id = Number(result.lastInsertRowid);
-      if (originalId == null) originalId = id;
-      insertHistory.run(id, row.status, now);
-    }
-  });
-
-  seed();
+  let originalId: number | null = null;
+  for (const row of SEED) {
+    const duplicateOfId = row.duplicateOf === "original" ? originalId : null;
+    const result = insertInvoice.run(
+      row.vendor,
+      row.invoice_number,
+      row.amount_cents,
+      row.currency ?? "USD",
+      row.invoice_date,
+      row.status,
+      duplicateOfId,
+      now,
+      now,
+    );
+    const id = Number(result.lastInsertRowid);
+    if (originalId == null) originalId = id;
+    insertHistory.run(id, row.status, now);
+  }
 }

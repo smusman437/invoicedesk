@@ -63,10 +63,12 @@ export function ListPage() {
     setResetting(true);
     setError(null);
     try {
-      const rows = await api.resetSamples();
+      await api.resetSamples();
+      const rows = await api.list();
       setInvoices(rows);
+      setTab("needs_review");
     } catch (err: unknown) {
-      setError(err instanceof ApiError ? err.message : "Could not restore the sample invoices");
+      setError(err instanceof Error ? err.message : "Could not restore the sample invoices");
     } finally {
       setResetting(false);
     }
@@ -110,10 +112,13 @@ export function ListPage() {
       {error && <div className="banner error">{error}</div>}
       {loading && <p className="muted">Loading invoices…</p>}
 
-      {!loading && !error && visible.length === 0 && (
+      {!loading && visible.length === 0 && (
         <div className="empty">
           <p>{emptyCopy}</p>
           <p>This demo does not have an “add invoice” form. Restore samples puts the original five bills back, including the duplicate.</p>
+          <button type="button" className="btn ghost" disabled={resetting} onClick={() => void restoreSamples()}>
+            {resetting ? "Restoring…" : "Restore samples"}
+          </button>
         </div>
       )}
 

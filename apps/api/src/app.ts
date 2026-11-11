@@ -76,7 +76,7 @@ export function buildApp(db: Database.Database, opts: { logger?: boolean } = {})
 
   // Not part of the invoice API. Puts the five sample invoices back after
   // a walkthrough so the Processing / Needs review tabs are not stuck empty.
-  app.post("/api/reset-samples", () => {
+  app.post("/api/reset-samples", async () => {
     resetSamples(db);
     return listInvoices(db);
   });
