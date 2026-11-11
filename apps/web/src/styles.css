@@ -89,6 +89,10 @@ a {
   margin-bottom: 20px;
 }
 
+.panel-head .btn {
+  flex-shrink: 0;
+}
+
 h1,
 h2 {
   font-family: Palatino, "Palatino Linotype", "Iowan Old Style", Georgia, serif;
@@ -345,6 +349,12 @@ h2 {
 .empty {
   color: var(--muted);
   padding: 24px 0 8px;
+  max-width: 42rem;
+  line-height: 1.5;
+}
+
+.empty p {
+  margin: 0 0 10px;
 }
 
 .back {

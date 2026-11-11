@@ -18,12 +18,9 @@ type SeedInvoice = {
   duplicateOf?: "original";
 };
 
-/**
- * Five invoices, four vendors. #5 shares vendor + invoice_number (and
- * amount) with #1 so the duplicate story is obvious in the UI. The
- * original is seeded as needs_review so Approve on #5 is illegal out of
- * the box — reviewers can still Reject the copy.
- */
+// Five sample invoices, four vendors. #5 is the same vendor + number as #1
+// (and the same amount) so the duplicate is obvious. #1 starts in
+// needs_review, which is why Approve on #5 is blocked from the first click.
 const SEED: SeedInvoice[] = [
   {
     vendor: "Acme Supplies",
@@ -103,7 +100,20 @@ function migrate(db: Database.Database): void {
 function seedIfEmpty(db: Database.Database): void {
   const count = db.prepare("SELECT COUNT(*) AS n FROM invoices").get() as { n: number };
   if (count.n > 0) return;
+  insertSeed(db);
+}
 
+/** Wipe reviewer work and put the original five samples back. Demo only. */
+export function resetSamples(db: Database.Database): void {
+  const reset = db.transaction(() => {
+    db.exec("DELETE FROM status_history");
+    db.exec("DELETE FROM invoices");
+    insertSeed(db);
+  });
+  reset();
+}
+
+function insertSeed(db: Database.Database): void {
   const now = new Date().toISOString();
   const insertInvoice = db.prepare(`
     INSERT INTO invoices (

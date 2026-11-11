@@ -9,7 +9,7 @@ export function App() {
         <Link to="/" className="brand">
           InvoiceDesk
         </Link>
-        <p className="tagline">Review queue for AP invoices</p>
+        <p className="tagline">Invoices waiting on a person</p>
       </header>
       <main className="content">
         <Routes>

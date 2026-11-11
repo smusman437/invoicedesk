@@ -18,6 +18,7 @@ export function ListPage() {
   const [tab, setTab] = useState<TabId>("needs_review");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -58,13 +59,36 @@ export function ListPage() {
     return invoices.filter((invoice) => statuses.includes(invoice.status));
   }, [invoices, tab]);
 
+  async function restoreSamples() {
+    setResetting(true);
+    setError(null);
+    try {
+      const rows = await api.resetSamples();
+      setInvoices(rows);
+    } catch (err: unknown) {
+      setError(err instanceof ApiError ? err.message : "Could not restore the sample invoices");
+    } finally {
+      setResetting(false);
+    }
+  }
+
+  const emptyCopy =
+    tab === "processing"
+      ? "Nothing sitting in processing. New bills start here; once intake is done they move to Needs review."
+      : tab === "needs_review"
+        ? "This queue is clear. Anything you already decided on is in Approved / Rejected."
+        : "No approved or rejected invoices yet.";
+
   return (
     <section className="panel">
       <div className="panel-head">
         <div>
           <h1>Invoices</h1>
-          <p className="lede">Open a row to review, approve, or reject.</p>
+          <p className="lede">Click a row to open it. Approve or reject from there.</p>
         </div>
+        <button type="button" className="btn ghost" disabled={resetting} onClick={() => void restoreSamples()}>
+          {resetting ? "Restoring…" : "Restore samples"}
+        </button>
       </div>
 
       <div className="tabs" role="tablist" aria-label="Invoice status">
@@ -87,7 +111,10 @@ export function ListPage() {
       {loading && <p className="muted">Loading invoices…</p>}
 
       {!loading && !error && visible.length === 0 && (
-        <p className="empty">No invoices in this tab.</p>
+        <div className="empty">
+          <p>{emptyCopy}</p>
+          <p>This demo does not have an “add invoice” form. Restore samples puts the original five bills back, including the duplicate.</p>
+        </div>
       )}
 
       {!loading && visible.length > 0 && (

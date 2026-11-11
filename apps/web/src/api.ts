@@ -33,4 +33,7 @@ export const api = {
       body: JSON.stringify({ status }),
     });
   },
+  resetSamples(): Promise<Invoice[]> {
+    return request<Invoice[]>("/api/reset-samples", { method: "POST" });
+  },
 };

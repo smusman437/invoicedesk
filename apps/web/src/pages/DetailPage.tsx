@@ -109,7 +109,7 @@ export function DetailPage() {
           </Link>
           {invoice.status === "needs_review" &&
           (invoice.duplicate_of.status === "approved" || invoice.duplicate_of.status === "needs_review")
-            ? " — approval is blocked while the original is still live or already approved."
+            ? " You can reject this copy, but you cannot approve it while the original is still in review or already approved."
             : null}
         </p>
       )}

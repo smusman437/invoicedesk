@@ -95,8 +95,8 @@ export function updateStatus(db: Database.Database, id: number, to: Status): Inv
 
   const now = new Date().toISOString();
 
-  // Invoice row + history row in one transaction so a crash cannot leave
-  // a status change without an audit trail (or the reverse).
+  // Write the new status and the history row together so a crash cannot
+  // leave one without the other.
   const apply = db.transaction(() => {
     db.prepare(
       `UPDATE invoices SET status = ?, updated_at = ? WHERE id = ?`,

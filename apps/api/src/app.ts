@@ -1,6 +1,7 @@
 import Fastify, { type FastifyError } from "fastify";
 import type Database from "better-sqlite3";
 import { ApiError } from "./errors.js";
+import { resetSamples } from "./db.js";
 import { getInvoice, listInvoices, updateStatus } from "./invoices.js";
 import { isStatus } from "./types.js";
 
@@ -71,6 +72,13 @@ export function buildApp(db: Database.Database, opts: { logger?: boolean } = {})
     }
 
     return updateStatus(db, id, status);
+  });
+
+  // Not part of the invoice API. Puts the five sample invoices back after
+  // a walkthrough so the Processing / Needs review tabs are not stuck empty.
+  app.post("/api/reset-samples", () => {
+    resetSamples(db);
+    return listInvoices(db);
   });
 
   return app;

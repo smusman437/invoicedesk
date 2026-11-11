@@ -2,16 +2,14 @@ import { ApiError } from "./errors.js";
 import type { InvoiceRow, Status } from "./types.js";
 
 /**
- * Status is a small state machine, not a free-form field.
+ * Status is a state machine, not a free-form field.
  *
- * processing  — intake / extraction. System-owned; reviewers cannot send
- *               work back here (no undo in this slice).
- * needs_review — the only human decision point.
- * approved / rejected — terminal. Paying twice, or quietly reopening a
- *               rejection, needs a richer audit model than we have.
+ * processing   — still being ingested. Reviewers cannot send work back here.
+ * needs_review — the only place a person decides.
+ * approved / rejected — done. Reopening would need a who/why we do not store.
  *
- * Same-status PATCH is refused even though it is a no-op: a client that
- * thinks it is changing something should get a conflict, not a silent 200.
+ * PATCH to the same status is a 409: if the client thought it changed
+ * something, a quiet 200 would hide the bug.
  */
 export const ALLOWED_TRANSITIONS: Record<Status, readonly Status[]> = {
   processing: ["needs_review"],
@@ -29,11 +27,11 @@ export function isAllowedTransition(from: Status, to: Status): boolean {
 }
 
 /**
- * Duplicate key is lower(trim(vendor)) + trim(invoice_number). Amount is
- * not part of the key (a corrected amount on the same invoice # is still
- * the same invoice). We never auto-reject: OCR / vendor typos happen, so
- * a human has to look. We *do* block approval while the original is still
- * live (needs_review) or already approved — that is the double-pay case.
+ * Same vendor + invoice number (trimmed, case-insensitive) counts as a
+ * duplicate. Amount is ignored: a corrected total is still the same bill.
+ * We flag it instead of auto-rejecting — typos happen. We do block
+ * approving the copy while the original is still in review or already
+ * approved, because that is how you pay twice.
  */
 export function canApproveDuplicate(original: InvoiceRow | null): boolean {
   if (!original) return true;

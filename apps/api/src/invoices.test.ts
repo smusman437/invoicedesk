@@ -198,6 +198,25 @@ describe("invoices API", () => {
       error: { code: "DUPLICATE_APPROVAL_BLOCKED" },
     });
   });
+
+  it("restores the five sample invoices", async () => {
+    const rejected = await app.inject({
+      method: "PATCH",
+      url: "/api/invoices/5",
+      payload: { status: "rejected" },
+    });
+    expect(rejected.statusCode).toBe(200);
+
+    const reset = await app.inject({ method: "POST", url: "/api/reset-samples" });
+    expect(reset.statusCode).toBe(200);
+    const invoices = reset.json<Invoice[]>();
+    expect(invoices).toHaveLength(5);
+
+    const byId = Object.fromEntries(invoices.map((inv) => [inv.id, inv]));
+    expect(byId[2]?.status).toBe("processing");
+    expect(byId[5]?.status).toBe("needs_review");
+    expect(byId[5]?.duplicate_of_id).toBe(1);
+  });
 });
 
 describe("invoice persistence", () => {
