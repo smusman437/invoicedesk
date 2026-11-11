@@ -1,0 +1,17 @@
+{
+  "name": "invoicedesk",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "start": "concurrently -k -n api,web -c cyan,magenta \"cd apps/api && tsx src/index.ts\" \"cd apps/web && vite --port 3000 --strictPort\"",
+    "test": "cd apps/api && vitest run"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
